@@ -10,6 +10,7 @@ site.use(express.static('./'));
 function fetch_and_update()
 {
   var stored_data = require('./stored_data.json');
+  var stored_data = stored_data[stored_data.length-1];
   if (stored_data.length==0 || Math.abs(new Date(stored_data) - new Date())>3600000)
   {
     console.log("No Data or Data older than 1 hour. Fetching new Data.");
@@ -52,7 +53,7 @@ function fetch_and_update()
         }
       }
       var stored_data1 = require('./stored_data.json');
-      stored_data.push(current);
+      stored_data1.push(current);
       fs.writeFile('./stored_data.json', JSON.stringify(stored_data1), err => { if (err) throw err;});
 
     });
@@ -60,14 +61,21 @@ function fetch_and_update()
 }
 
 site.get('/get_data', function(req, res){
-  fetch_and_update(function (error){
-    let recent_store = require('./stored_data.json');
-    res.json(JSON.parse({recent_store}));
-  });
+  fetch_and_update(function (error){});
+  let recent_store = require('./stored_data.json');
+  res.json(recent_store);
 });
 
 site.get('/get_data_on', function(req, res){
-  var fn1 = req.body['date'];
+  var source = req.url.toString();
+  source = source.split('?')[1].substring(5);
+  source = source.split('%20');
+  var fn1 = "";
+  for (xx in source)
+  {
+    if (xx!=source.length-1) fn1+=source[xx]+" ";
+    else fn1+=source[xx];
+  }
   var fn = 'stored_data - '+fn1+'.json';
   res.json(require('./'+fn, function(err){console.log("Not Found");}));
 });
