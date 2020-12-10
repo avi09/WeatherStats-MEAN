@@ -1,0 +1,221 @@
+<html>
+   <head>
+
+     <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+     <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+  <title>WeatherStats</title>
+   </head>
+
+   <body ng-app="myApp" ng-controller = "ajaxController" style="background-color: black; color: white; font-size: 22;">
+     <center>WeatherStats - Home<br><br>
+     <div style="font-size: 20;">From - {{date}}</div><br></center>
+     <div>
+       <div style="width: 100%; height: 80%;">
+         <div style="width: 15%; float: left;">
+           <center>
+             X - Latitude (Degrees)<br><br>
+             <div style="border: 1px solid white; width: 95%; font-size: 15; float: left;">
+               Currently Showing<br><font size=6><b>{{heading}}</b></font>
+             </div><br><br><br><br>
+             {{guide[heading][0]}}<br>
+            <button style="background-color: #ffffff; color: white;"></button>
+            <button style="background-color: #e3e1e1; color: white;"></button>
+            <button style="background-color: #bfbfbf; color: white;"></button>
+            <button style="background-color: #9c9c9c; color: white;"></button>
+            <button style="background-color: #706f6f; color: white;"></button>
+            <button style="background-color: #404040; color: white;"></button>
+            <button style="background-color: #2e2d2d; color: white;"></button>
+            <button style="background-color: #242424; color: white;"></button>
+            <br><br>
+            {{guide[heading][1]}}<br>
+           <button style="background-color: #ffffff; color: white; width: 4%;"></button>
+           <button style="background-color: #ffffff; color: white; width: 6%;"></button>
+           <button style="background-color: #ffffff; color: white; width: 8%;"></button>
+           <button style="background-color: #ffffff; color: white; width: 10%;"></button>
+           <button style="background-color: #ffffff; color: white; width: 11%;"></button>
+           <button style="background-color: #ffffff; color: white; width: 15%;"></button>
+
+           <br><br>
+           <button ng-click="createch_main('main')" style="background: transparent; color: white; border: 1px solid white; font-size: 17;">
+           main stats (temp, rain)
+          </button><br><br>
+
+           <button ng-click="createch_main('wind')" style="background: transparent; color: white; border: 1px solid white; font-size: 17;">
+           wind stats (speed, pressure)
+           </button><br><br>
+
+           <button ng-click="createch_main('health')" style="background: transparent; color: white; border: 1px solid white; font-size: 17;">
+            health stats (pollution, pollen)
+           </button><br><br>
+
+           <div style="font-size: 22;"><b>All Stats</b></div><br>
+           <table style="float: left; border: 1px solid white; width: 95%; font-size: 17; text-align: center;">
+            <tr><td>Statistic</td><td>Max</td><td>Mean</td></tr>
+            <tr></tr>
+           <tr ng-repeat="xy in mean_stats" style="font-size: 15; text-align: center;">
+             <td>{{xy["name"]}}</td>
+             <td style="font-size: 17;">{{xy["max"]}} {{xy["unit"]}}</td>
+             <td style="font-size: 17;">{{xy["mean"]}} {{xy["unit"]}}</td>
+           </tr>
+          </table>
+
+           </center></div>
+        <div id="main_screen" style="width: 85%; float: right; border-radius: 25px; height: 100%; background-image: url('m2.jpg');
+        background-size: contain;"></div>
+      </div><br>
+      <center>Y - Longitude (Degrees)</center>
+      <font size=4 style="float: right;">data credits - climacell | node.js | angularjs | canvasjs</font>
+    <script>
+        var weather = angular.module('myApp', []);
+        weather.controller('ajaxController', function($scope, $http){
+        var url = window.location.href+"get_data";
+        $http.get(url).then(function (response){
+          $scope.stats = response.data;
+          $scope.heading = "Main Stats";
+          $scope.mean_stats = [
+          {name:"Temperature",mean:0,max:0, unit:"C"},
+          {name:"Humidity",mean:0,max:0, unit:"%"},
+          {name:"Precipitation",mean:0,max:0, unit:"mm/hr"},
+          {name:"Wind Speed",mean:0,max:0, unit:"m/s"},
+          {name:"Carbon M",mean:0,max:0, unit:"ppm"},
+          {name:"Radiation",mean:0,max:0, unit:"w/sqm"},
+          {name:"Air pressure",mean:0,max:0, unit:"hPa"},
+          {name:"pm25",mean:0,max:0, unit:"ug/m3"},
+          {name:"so2 Density",mean:0,max:0, unit:"ppm"}
+        ];
+          $scope.guide = {"Main Stats":["Temperature", "Humidity"], "Wind Stats":["Wind Speed", "Cloud Cover"],
+          "Pollution Stats":["pm25 Density", "so2 Density"]};
+          $scope.createch_main =
+          function (forecast)
+          {
+            var stats = $scope.stats;
+            var stats = JSON.parse(JSON.stringify(stats).split('"lat":').join('"y":'));
+            var stats = JSON.parse(JSON.stringify(stats).split('"lon":').join('"x":'));
+            var ttext = "";
+            var stats_core = ["temp","humidity", "precipitation", "wind_speed", "co", "surface_shortwave_radiation", "baro_pressure", "pm25", "so2"];
+            $scope.date = $scope.stats[0]["time"];
+            for (xx in [0,1,2,3,4,5,6,7,8])
+            {
+              for (xy in $scope.stats)
+              {
+                $scope.mean_stats[xx]["mean"]=Number(($scope.mean_stats[xx]["mean"]+$scope.stats[xy][stats_core[xx]]).toFixed(2));
+                if ($scope.mean_stats[xx]["max"]<$scope.stats[xy][stats_core[xx]])
+                {
+                  $scope.mean_stats[xx]["max"] = Number($scope.stats[xy][stats_core[xx]].toFixed(2));
+                }
+              }
+            }
+
+            for (xx in [0,1,2,3,4,5,6,7,8])
+            {
+              $scope.mean_stats[xx]["mean"]=Number(($scope.mean_stats[xx]["mean"]/$scope.stats.length).toFixed(2));
+            }
+
+            if (forecast=="main")
+            {
+            s = '"humidity":';
+            unit = "%";
+            var stats = JSON.parse(JSON.stringify(stats).split(s).join('"z":'));
+            var ttcontext = [["x","Longitude", "D"], ["y","Latitude", "D"], ["z","Humidity", unit], ["temp","Temperature", "C"],
+            ["precipitation","precipitation", "mm/hr"]];
+            for (x in stats[0])
+            {
+              for (y in ttcontext)
+              {
+                if (x==ttcontext[y][0])
+                {
+                  tm = ttcontext[y][1] + ": {"+x+"} "+ttcontext[y][2]+"<br/>";
+                  ttext+=tm;
+                }
+              }
+
+              for (xy in stats)
+              {
+                //console.log("rgb("+parseInt((stats[xy]["temp"]/$scope.mean_stats[0]["max"])*256)+",50,50)");
+                var cx = 256 - parseInt((stats[xy]["temp"]/$scope.mean_stats[0]["max"])*256);
+                var cx1 = "("+cx+","+cx+","+cx+")";
+                stats[xy]["color"] = "rgb"+cx1;
+              }
+            }
+            $scope.heading = "Main Stats";
+            }
+
+            if (forecast=="wind")
+            {
+            s = '"cloud_cover":';
+            unit = "%";
+            var stats = JSON.parse(JSON.stringify(stats).split(s).join('"z":'));
+            var ttcontext = [["x","Longitude", "D"], ["y","Latitude", "D"], ["z","Cloud Cover", unit], ["baro_pressure","Air pressure", "hPa"],
+            ["wind_speed","Wind Speed", "m/s"]];
+            for (x in stats[0])
+            {
+              for (y in ttcontext)
+              {
+                if (x==ttcontext[y][0])
+                {
+                  tm = ttcontext[y][1] + ": {"+x+"} "+ttcontext[y][2]+"<br/>";
+                  ttext+=tm;
+                }
+              }
+            }
+            for (xy in stats)
+            {
+              //console.log("rgb("+parseInt((stats[xy]["temp"]/$scope.mean_stats[0]["max"])*256)+",50,50)");
+              var cx = 256 - parseInt((stats[xy]["wind_speed"]/$scope.mean_stats[3]["max"])*256);
+              var cx1 = "("+cx+","+cx+","+cx+")";
+              stats[xy]["color"] = "rgb"+cx1;
+            }
+
+            $scope.heading = "Wind Stats";
+            }
+
+            if (forecast=="health")
+            {
+            s = '"pm25":';
+            unit = "ug/m3";
+            var stats = JSON.parse(JSON.stringify(stats).split(s).join('"z":'));
+            var ttcontext = [["x","Longitude", "D"], ["y","Latitude", "D"], ["z","pm25", unit], ["co","Carbon Monoxide", "ppm"],
+            ["so2","so2", "ppb"], ["surface_shortwave_radiation","Surface Radiation", "w/sqm"], ["pollen","Pollen Tree", "ci"]];
+            for (x in stats[0])
+            {
+              for (y in ttcontext)
+              {
+                if (x==ttcontext[y][0])
+                {
+                  tm = ttcontext[y][1] + ": {"+x+"} "+ttcontext[y][2]+"<br/>";
+                  ttext+=tm;
+                }
+              }
+            }
+
+            for (xy in stats)
+            {
+              //console.log("rgb("+parseInt((stats[xy]["temp"]/$scope.mean_stats[0]["max"])*256)+",50,50)");
+              var cx = 256 - parseInt((stats[xy]["so2"]/$scope.mean_stats[8]["max"])*256);
+              var cx1 = "("+cx+","+cx+","+cx+")";
+              stats[xy]["color"] = "rgb"+cx1;
+            }
+
+            $scope.heading = "Pollution Stats";
+            }
+            var chart = new CanvasJS.Chart("main_screen",
+            {
+            backgroundColor: "transparent", animationEnabled: true, zoomEnabled: true, theme: "dark1",
+
+            axisX: { suffix: "'", minimum: -170, maximum: 170, gridThickness: 0.4, labelFontColor: "black"},
+
+            axisY:{ suffix: "'", minimum: -70, maximum: 70, gridThickness: 0.25 },
+
+            data: [{ type: "bubble", toolTipContent: ttext, dataPoints: stats, fillOpacity: .7, color: "white"}]
+            });
+
+            chart.render();
+        };
+        $scope.createch_main("main");
+      });
+      });
+    </script>
+
+    </div>
+   </body>
+</html>
