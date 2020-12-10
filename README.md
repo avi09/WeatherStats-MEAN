@@ -10,14 +10,14 @@ Data is archived from hour to hour, and the user can request for different times
 ## Running  
 Clone this repository  
 cd to this folder  
-`node main.js
+`node main.js`
 
 ## Technologies Used
-Data Source - ClimaCell API
-Data Communication - REST API for Archive List (/get_data) and Accurate Data (/get_data_on?date=__)
-Server - NodeJS
-Website - AngularJS | HTML | CSS | CanvasJS
-Data Archive - NoSQL
+Data Source - ClimaCell API  
+Data Communication - REST API for Archive List (/get_data) and Accurate Data (/get_data_on?date=__)  
+Server - NodeJS  
+Website - AngularJS | HTML | CSS | CanvasJS  
+Data Archive - NoSQL  
 
 ## Screenshot
 ![alt text](ss.png)
