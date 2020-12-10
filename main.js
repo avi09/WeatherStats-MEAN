@@ -55,8 +55,13 @@ function fetch_and_update()
       var stored_data1 = require('./stored_data.json');
       stored_data1.push(current);
       fs.writeFile('./stored_data.json', JSON.stringify(stored_data1), err => { if (err) throw err;});
-
+      return;
     });
+  }
+  else
+  {
+    console.log("Data is already new.");
+    return;
   }
 }
 

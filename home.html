@@ -8,15 +8,39 @@
 
    <body ng-app="myApp" ng-controller = "ajaxController" style="background-color: black; color: white; font-size: 22;">
      <center><div style="background-color: #13171a;">WeatherStats - Home</div><br>
-     <div style="font-size: 20;">From - {{date}} &nbsp; {{cr}}/{{received.length-1}}</div><br></center>
+
+     <div style="font-size: 20;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+       <button ng-click="get_accurate(-1)" style="background: transparent; color: white; border: 1px dotted #0b98de; font-size: 17;">
+       <
+       </button>&nbsp;&nbsp;
+
+     From - {{date}} &nbsp; {{cr}}/{{received.length-1}}&nbsp;&nbsp;
+
+      <button ng-click="get_accurate(-2)" style="background: transparent; color: white; border: 1px dotted #0b98de; font-size: 17;">
+      >
+      </button>&nbsp;&nbsp;
+
+     <button ng-click="createch_main('main')" style="background: transparent; color: {{color_ch['main']}}; border: 1px dotted white; font-size: 17;">
+     main stats (temp, rain)
+    </button>&nbsp;&nbsp;
+
+     <button ng-click="createch_main('wind')" style="background: transparent; color: {{color_ch['wind']}}; border: 1px dotted white; font-size: 17;">
+     wind stats (speed, pressure)
+     </button>&nbsp;&nbsp;
+
+     <button ng-click="createch_main('health')" style="background: transparent; color: {{color_ch['health']}}; border: 1px dotted white; font-size: 17;">
+      health stats (pollution, pollen)
+    </button></div><br>
+     </center>
      <div>
        <div style="width: 100%; height: 80%;">
          <div style="width: 15%; float: left;">
            <center>
              X - Latitude (Degrees)<br><br>
-             <div style="border: 1px solid white; width: 95%; font-size: 15; float: left;">
+             <div style="border: 1px solid white; width: 95%; font-size: 13; float: left;background-color: #13171a;">
                Currently Showing<br><font size=6><b>{{heading}}</b></font>
              </div><br><br><br><br>
+             <div>
              {{guide[heading][0]}}<br>
             <button style="background-color: #ffffff; color: white;"></button>
             <button style="background-color: #e3e1e1; color: white;"></button>
@@ -34,28 +58,17 @@
            <button style="background-color: #ffffff; color: white; width: 10%;"></button>
            <button style="background-color: #ffffff; color: white; width: 11%;"></button>
            <button style="background-color: #ffffff; color: white; width: 15%;"></button>
-
+           </div>
            <br><br>
-           <button ng-click="createch_main('main')" style="background: transparent; color: white; border: 1px solid white; font-size: 17;">
-           main stats (temp, rain)
-          </button><br><br>
 
-           <button ng-click="createch_main('wind')" style="background: transparent; color: white; border: 1px solid white; font-size: 17;">
-           wind stats (speed, pressure)
-           </button><br><br>
-
-           <button ng-click="createch_main('health')" style="background: transparent; color: white; border: 1px solid white; font-size: 17;">
-            health stats (pollution, pollen)
-           </button><br><br>
-
-           <div style="font-size: 22;"><b>All Stats</b></div><br>
-           <table style="float: left; border: 1px solid white; width: 95%; font-size: 17; text-align: center;">
-            <tr><td>Statistic</td><td>Max</td><td>Mean</td></tr>
+           <div style="font-size: 22; "><b>All Stats</b></div><br>
+           <table style="float: left; border: 1px solid white; width: 95%; font-size: 17; text-align: center; background-color: #13171a;">
+            <tr><th>Statistic</th><th>Max</th><th>Mean</th></tr>
             <tr></tr>
-           <tr ng-repeat="xy in mean_stats" style="font-size: 15; text-align: center;">
+           <tr ng-repeat="xy in mean_stats" style="font-size: 20; text-align: center;">
              <td>{{xy["name"]}}</td>
-             <td style="font-size: 17;">{{xy["max"]}} {{xy["unit"]}}</td>
-             <td style="font-size: 17;">{{xy["mean"]}} {{xy["unit"]}}</td>
+             <td style="font-size: 19;">{{xy["max"]}}<br>{{xy["unit"]}}</td>
+             <td style="font-size: 19;">{{xy["mean"]}} <br>{{xy["unit"]}}</td>
            </tr>
           </table>
 
@@ -68,10 +81,10 @@
     <script>
         var weather = angular.module('myApp', []);
         weather.controller('ajaxController', function($scope, $http){
-
           $scope.createch_main =
           function (forecast)
           {
+            $scope.color_ch = {'main':'white', 'wind':'white', 'health': 'white'};
             $scope.cr = $scope.received.findIndex(function (tm){return tm.substring(0,20)==$scope.stats[0]["time"].substring(0,20);});
             var stats = $scope.stats;
             var stats = JSON.parse(JSON.stringify(stats).split('"lat":').join('"y":'));
@@ -116,6 +129,7 @@
 
               for (xy in stats)
               {
+                stats[xy]["z"] = stats[xy]["z"];
                 //console.log("rgb("+parseInt((stats[xy]["temp"]/$scope.mean_stats[0]["max"])*256)+",50,50)");
                 var cx = 256 - parseInt((stats[xy]["temp"]/$scope.mean_stats[0]["max"])*256);
                 var cx1 = "("+cx+","+cx+","+cx+")";
@@ -123,6 +137,7 @@
               }
             }
             $scope.heading = "Main Stats";
+            $scope.color_ch['main'] = '#0b98de';
             }
 
             if (forecast=="wind")
@@ -152,6 +167,7 @@
             }
 
             $scope.heading = "Wind Stats";
+            $scope.color_ch['wind'] = '#0b98de';
             }
 
             if (forecast=="health")
@@ -180,7 +196,7 @@
               var cx1 = "("+cx+","+cx+","+cx+")";
               stats[xy]["color"] = "rgb"+cx1;
             }
-
+            $scope.color_ch['health'] = '#0b98de';
             $scope.heading = "Pollution Stats";
             }
             var chart = new CanvasJS.Chart("main_screen",
@@ -220,11 +236,26 @@
       }
 
       $scope.get_accurate = function (x){
-
+        if (x==-1)
+        {
+          if ($scope.cr>=1)
+          {
+            $scope.cr-=1;
+            x = $scope.cr;
+          }
+        }
+        else if (x==-2)
+        {
+          if ($scope.cr<$scope.received.length-1)
+          {
+            $scope.cr+=1;
+            x = $scope.cr;
+          }
+        }
         var url = window.location.href+"get_data_on";
             $http.get(url+"?date="+$scope.received[x]).then(function (response){
             $scope.stats = response["data"];
-            $scope.createch_main("main");
+            $scope.createch_main("health");
           });
       }
 
